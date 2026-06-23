@@ -47,7 +47,7 @@ test.describe('@smoke @regression Product Search and Browse Tests', () => {
 
   test('TC012: User Can Filter Products by Category', async ({ page }) => {
     const initialCount = await productsPage.getProductCount();
-    await productsPage.selectCategory('men');
+    await productsPage.selectCategory('#Men');
     const filteredCount = await productsPage.getProductCount();
     expect(filteredCount).toBeLessThanOrEqual(initialCount);
   });

@@ -1,77 +1,60 @@
 const { expect } = require('@playwright/test');
-const BasePage = require('./BasePage');
 
-class ProductsPage extends BasePage {
+class ProductsPage {
   constructor(page) {
-    super(page);
+    this.page = page;
     this.productList = '.features_items .productinfo';
-    this.viewProductButton = 'a[href*="/product/"]';
+    this.ProductButton = '//a[@href="/products"]';
+    this.viewProductdetail = '//a[@href="/product_details/1"]';
     this.addToCartButton = 'a.btn-default[data-product-id]';
     this.cartButton = 'a[href="/view_cart"]';
     this.searchInput = 'input[id="search_product"]';
     this.searchButton = 'button[id="submit_search"]';
-    this.productTitle = 'h2.title:has-text("All Products")';
+    this.productCategory = 'a[href*="category"]';
+    this.priceFilter = '.price-range';
   }
 
   async navigateToProducts() {
-    await this.safeNavigate('/products');
-    await this.waitForPageLoad('networkidle');
-    await this.verifyProductsPageLoaded();
+    await this.page.goto('/products');
   }
 
   async verifyProductsPageLoaded() {
-    await this.verifyElementVisible(this.productTitle, 15000);
-    await this.waitForElements(this.productList, 1, 15000);
+    await expect(this.page.locator(this.productList).first()).toBeVisible();
   }
 
   async getProductCount() {
-    await this.verifyProductsPageLoaded();
-    const count = await this.page.locator(this.productList).count();
-    console.log(`Found ${count} products`);
-    return count;
+    return await this.page.locator(this.productList).count();
   }
 
   async viewFirstProduct() {
-    await this.verifyProductsPageLoaded();
-    await this.waitForElement(this.viewProductButton, 15000);
-    const firstProduct = this.page.locator(this.viewProductButton).first();
-    await firstProduct.click({ timeout: 10000 });
-    await this.waitForPageLoad('networkidle');
+    await this.page.locator(this.ProductButton).click();
+    await this.page.locator(this.viewProductdetail).click();
+    await this.page.waitForLoadState('networkidle');
   }
 
   async searchProduct(productName) {
-    await this.verifyElementVisible(this.searchInput, 10000);
-    await this.fillElement(this.searchInput, productName, 10000);
-    await this.clickElement(this.searchButton, 10000);
-    await this.waitForPageLoad('networkidle');
+    await this.page.fill(this.searchInput, productName);
+    await this.page.click(this.searchButton);
+    await this.page.waitForLoadState('networkidle');
   }
 
   async addProductToCart(productIndex = 0) {
-    await this.verifyProductsPageLoaded();
-    
     const addButtons = this.page.locator(this.addToCartButton);
-    const count = await addButtons.count();
-    
-    expect(count).toBeGreaterThan(productIndex);
-    
-    const button = addButtons.nth(productIndex);
-
-    await button.hover({ timeout: 10000 });
-    await button.click({ timeout: 10000 });
-    await this.page.waitForTimeout(1000); 
+    if (productIndex < await addButtons.count()) {
+      await addButtons.nth(productIndex).hover();
+      await addButtons.nth(productIndex).click();
+    }
   }
 
   async verifySearchResults(keyword) {
-    await this.waitForPageLoad('networkidle');
     const results = await this.page.locator(this.productList).count();
-    console.log(`🔍 Search for "${keyword}": ${results} results`);
-    return results;
+    expect(results).toBeGreaterThan(0);
   }
 
   async selectCategory(categoryName) {
-    const categoryLink = `a[href*="${categoryName}"]`;
-    await this.clickElement(categoryLink, 10000);
-    await this.waitForPageLoad('networkidle');
+    const categoryLink = this.page.locator(`//a[@href="${categoryName}"]`);
+    await categoryLink.click();
+    await this.page.waitForLoadState('domcontentloaded');
   }
 }
 

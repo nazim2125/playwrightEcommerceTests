@@ -1,8 +1,8 @@
 
 const testData = {
   validUser: {
-    email: 'automation.test.user@example.com',
-    password: 'TestPassword123!',
+    email: 'nazim57262@gmail.com',
+    password: 'password@123',
     firstName: 'Test',
     lastName: 'User',
     address: '123 Test Street',
@@ -48,7 +48,7 @@ const testData = {
   newsletterEmail: `newsletter.${Date.now()}@example.com`,
 
   urls: {
-    baseUrl: 'https://practice.automationexercise.com',
+    baseUrl: 'https://www.automationexercise.com',
     homeUrl: '/',
     loginUrl: '/login',
     productsUrl: '/products',

@@ -23,7 +23,7 @@ test.describe('@smoke @regression Shopping Cart Tests', () => {
 
   test('TC014: User Can View Cart After Adding Product', async ({ page }) => {
     await productsPage.addProductToCart(0);
-    await page.click('a.btn.btn-default:has-text("View Cart")');
+    await page.click('//a[@href="/view_cart"]');
     await cartPage.verifyCartPageLoaded();
     await cartPage.verifyCartNotEmpty();
   });

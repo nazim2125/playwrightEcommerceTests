@@ -5,7 +5,7 @@ module.exports = defineConfig({
   fullyParallel: false,  
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1, 
-  workers: process.env.CI ? 1 : 2, 
+  workers: process.env.CI ? 2 : 4, 
   reporter: [
     ['html'],
     ['json', { outputFile: 'test-results/results.json' }],

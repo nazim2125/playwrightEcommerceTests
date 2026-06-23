@@ -1,8 +1,8 @@
 const testData = {
   users: {
     validUser: {
-      email: 'testuser@automation.com',
-      password: 'Test@123',
+      email: 'nazim57262@gmail.com',
+      password: 'password@123',
       firstName: 'Test',
       lastName: 'User',
     },

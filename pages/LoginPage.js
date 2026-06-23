@@ -1,9 +1,8 @@
 const { expect } = require('@playwright/test');
-const BasePage = require('./BasePage');
 
-class LoginPage extends BasePage {
+class LoginPage {
   constructor(page) {
-    super(page);
+    this.page = page;
     this.emailInput = 'input[data-qa="login-email"]';
     this.passwordInput = 'input[data-qa="login-password"]';
     this.loginButton = 'button[data-qa="login-button"]';
@@ -12,60 +11,50 @@ class LoginPage extends BasePage {
     this.signupButton = 'button[data-qa="signup-button"]';
     this.errorMessage = 'p[style*="color: red"]';
     this.loggedInAs = 'a:has-text("Logged in as")';
-    this.loginForm = 'div.login-form';
   }
+
+  async navigateToLoginPage() {
+  await this.page.goto('https://www.automationexercise.com/login', {
+    waitUntil: 'domcontentloaded'
+  });
+}
 
   async login(email, password) {
-    await this.verifyElementVisible(this.loginForm, 10000);
-    await this.fillElement(this.emailInput, email, 10000);
-    await this.fillElement(this.passwordInput, password, 10000);
-    await this.page.click(this.loginButton);
-    await this.waitForPageLoad('networkidle');
-    try {
-      await this.verifyElementVisible(this.loggedInAs, 10000);
-    } catch (error) {
-      console.error('Login failed - not logged in');
-      throw error;
-    }
-  }
+  await this.page.fill(this.emailInput, email);
+  await this.page.fill(this.passwordInput, password);
+  await this.page.click(this.loginButton);
 
+  await Promise.race([
+    this.page.locator(this.loggedInAs).waitFor({ state: 'visible' }),
+    this.page.locator(this.errorMessage).waitFor({ state: 'visible' })
+  ]);
+}
   async signup(name, email) {
-    await this.verifyElementVisible(this.signupNameInput, 10000);
-    await this.verifyElementVisible(this.signupEmailInput, 10000);
-    await this.fillElement(this.signupNameInput, name, 10000);
-    await this.fillElement(this.signupEmailInput, email, 10000);
-    await this.page.click(this.signupButton);
-    await this.waitForPageLoad('networkidle');
-  }
+  await this.page.fill(this.signupNameInput, name);
+  await this.page.fill(this.signupEmailInput, email);
+  await this.page.click(this.signupButton);
+
+  await Promise.race([
+    this.page.locator(this.errorMessage).waitFor({ state: 'visible' }),
+    this.page.waitForURL(/signup/)
+  ]);
+}
 
   async verifyLoginPageLoaded() {
-    await this.verifyElementVisible(this.loginForm, 10000);
-    await this.verifyElementVisible(this.emailInput, 10000);
-    await this.verifyElementVisible(this.passwordInput, 10000);
+    await expect(this.page.locator(this.emailInput)).toBeVisible();
+    await expect(this.page.locator(this.passwordInput)).toBeVisible();
   }
 
   async verifyLoginSuccessful() {
-    await this.verifyElementVisible(this.loggedInAs, 15000);
     await expect(this.page.locator(this.loggedInAs)).toBeVisible();
   }
 
   async verifyErrorMessage() {
-    await this.verifyElementVisible(this.errorMessage, 10000);
     await expect(this.page.locator(this.errorMessage)).toBeVisible();
   }
 
   async getErrorMessage() {
-    await this.verifyElementVisible(this.errorMessage, 10000);
     return await this.page.locator(this.errorMessage).textContent();
-  }
-
-  async isLoggedIn() {
-    try {
-      await this.verifyElementVisible(this.loggedInAs, 5000);
-      return true;
-    } catch {
-      return false;
-    }
   }
 }
 

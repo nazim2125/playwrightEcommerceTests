@@ -1,115 +1,139 @@
-const { expect } = require('@playwright/test');
-
+/**
+ * BasePage - Base class for all page objects
+ * Contains common methods and utilities used across all pages
+ */
 class BasePage {
   constructor(page) {
     this.page = page;
   }
 
-  async waitForElement(selector, timeout = 10000) {
-    try {
-      await this.page.waitForSelector(selector, { state: 'visible', timeout });
-      return true;
-    } catch (error) {
-      console.error(`Element not visible: ${selector}`);
-      throw error;
-    }
+  /**
+   * Navigate to a specific URL
+   */
+  async goto(url = '/') {
+  await this.page.goto(url, {
+    waitUntil: 'domcontentloaded',
+    timeout: 30000
+  });
+}
+  /**
+   * Wait for page to load completely
+   */
+  async waitForPageLoad() {
+  await this.page.waitForLoadState('domcontentloaded');
+}
+
+  /**
+   * Click on an element
+   */
+  async click(selector) {
+    await this.page.locator(selector).click();
   }
 
-  async clickElement(selector, timeout = 10000) {
-    await this.waitForElement(selector, timeout);
-    await this.page.locator(selector).click({ timeout });
+  /**
+   * Fill text input
+   */
+  async fill(selector, text) {
+    await this.page.locator(selector).fill(text);
   }
 
-  async fillElement(selector, value, timeout = 10000) {
-    await this.waitForElement(selector, timeout);
-    await this.page.locator(selector).fill(value);
+  /**
+   * Get text from element
+   */
+  async getText(selector) {
+    return await this.page.locator(selector).textContent();
   }
 
-  async waitForPageLoad(state = 'networkidle') {
-    await this.page.waitForLoadState(state);
+  /**
+   * Check if element is visible
+   */
+  async isVisible(selector) {
+    return await this.page.locator(selector).isVisible();
   }
 
-  async navigateTo(url) {
-    await this.page.goto(url);
-    await this.waitForPageLoad('networkidle');
+  /**
+   * Wait for element to be visible
+   */
+  async waitForVisible(selector, timeout = 30000) {
+    await this.page.locator(selector).waitFor({ state: 'visible', timeout });
   }
 
-  async waitForText(text, timeout = 10000) {
-    await this.page.getByText(text).first().waitFor({ state: 'visible', timeout });
+  /**
+   * Wait for element to be hidden
+   */
+  async waitForHidden(selector, timeout = 30000) {
+    await this.page.locator(selector).waitFor({ state: 'hidden', timeout });
   }
 
-  async selectOption(selector, value) {
-    await this.waitForElement(selector);
-    await this.page.selectOption(selector, value);
-    await this.waitForPageLoad('networkidle');
+  /**
+   * Get page title
+   */
+  async getPageTitle() {
+    return await this.page.title();
   }
 
-  async verifyElementVisible(selector, timeout = 10000) {
-    const locator = this.page.locator(selector);
-    await locator.waitFor({ state: 'visible', timeout });
-    await expect(locator).toBeVisible();
-    return true;
+  /**
+   * Get current URL
+   */
+  async getCurrentUrl() {
+    return this.page.url();
   }
 
-  async verifyElementInvisible(selector, timeout = 10000) {
-    const locator = this.page.locator(selector);
-    await locator.waitFor({ state: 'hidden', timeout });
-    await expect(locator).not.toBeVisible();
-    return true;
+  /**
+   * Reload page
+   */
+  async reloadPage() {
+    await this.page.reload();
   }
 
-  async waitForElements(selector, count = 1, timeout = 10000) {
-    const locators = this.page.locator(selector);
-    await locators.first().waitFor({ state: 'visible', timeout });
-    const actualCount = await locators.count();
-    expect(actualCount).toBeGreaterThanOrEqual(count);
-    return actualCount;
+  /**
+   * Go back
+   */
+  async goBack() {
+    await this.page.goBack();
   }
 
+  /**
+   * Check if element exists
+   */
+  async elementExists(selector) {
+    const count = await this.page.locator(selector).count();
+    return count > 0;
+  }
+
+  /**
+   * Hover over element
+   */
+  async hover(selector) {
+    await this.page.locator(selector).hover();
+  }
+
+  /**
+   * Get all text from multiple elements
+   */
+  async getAllTexts(selector) {
+    return await this.page.locator(selector).allTextContents();
+  }
+
+  /**
+   * Select option from dropdown by value
+   */
+  async selectDropdown(selector, value) {
+    await this.page.locator(selector).selectOption(value);
+  }
+
+  /**
+   * Take screenshot
+   */
   async takeScreenshot(name) {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    await this.page.screenshot({ path: `screenshots/${name}-${timestamp}.png` });
+    await this.page.screenshot({ path: `screenshots/${name}.png`, fullPage: true });
   }
 
-  async waitWithRetry(asyncFn, maxRetries = 3, delayMs = 1000) {
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        return await asyncFn();
-      } catch (error) {
-        if (i === maxRetries - 1) throw error;
-        await this.page.waitForTimeout(delayMs);
-      }
-    }
-  }
-
-  async clearAndFill(selector, value) {
-    await this.waitForElement(selector);
-    const locator = this.page.locator(selector);
-    await locator.click();
-    await locator.press('Control+A');
-    await locator.press('Delete');
-    await locator.type(value);
-  }
-
-  async waitForAPIResponse(urlPattern, timeout = 10000) {
-    const response = await this.page.waitForResponse(
-      response => response.url().includes(urlPattern),
-      { timeout }
-    );
-    return response;
-  }
-
-  async safeNavigate(url) {
-    try {
-      await Promise.all([
-        this.page.waitForNavigation({ waitUntil: 'networkidle', timeout: 30000 }),
-        this.page.goto(url)
-      ]);
-    } catch (error) {
-      console.warn('Navigation with network idle failed, trying domcontentloaded');
-      await this.page.goto(url);
-      await this.page.waitForLoadState('domcontentloaded');
-    }
+  /**
+   * Wait for URL to contain text
+   */
+  async waitForUrlContains(text) {
+    await this.page.waitForURL(`**/*${text}*`);
   }
 }
 
