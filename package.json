@@ -1,0 +1,31 @@
+{
+  "name": "playwright-ecommerce-tests",
+  "version": "1.0.0",
+  "description": "Comprehensive Playwright end-to-end test automation for e-commerce platform",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:chromium": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit",
+    "test:all-browsers": "playwright test --project=chromium --project=firefox --project=webkit",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "test:sanity": "playwright test --grep @sanity",
+    "report": "playwright show-report"
+  },
+  "keywords": [
+    "playwright",
+    "automation",
+    "e-commerce",
+    "testing"
+  ],
+  "author": "Mohd Nazim Rasalat",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
+  }
+}
