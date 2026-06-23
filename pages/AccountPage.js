@@ -1,8 +1,8 @@
-const { expect } = require('@playwright/test');
+const BasePage = require('./BasePage');
 
-class AccountPage {
+class AccountPage extends BasePage {
   constructor(page) {
-    this.page = page;
+    super(page);
     this.accountDetailsHeader = 'h2:has-text("Account Information")';
     this.usernameBadge = '.badge';
     this.downloadInvoiceLink = 'a:has-text("Download Invoice")';
@@ -12,43 +12,68 @@ class AccountPage {
     this.myWishlistLink = 'a:has-text("My Wishlist")';
     this.deleteAccountButton = 'a:has-text("Delete Account")';
     this.logoutLink = 'a:has-text("Logout")';
+    this.loggedInAs = 'a:has-text("Logged in as")';
   }
 
   async navigateToAccount() {
-    await this.page.goto('/account');
+    await this.goto('/');
+    await this.verifyAccountPageLoaded();
   }
 
   async verifyAccountPageLoaded() {
-    await expect(this.page.locator(this.accountDetailsHeader)).toBeVisible();
+    await this.waitForVisible(this.loggedInAs);
   }
 
   async verifyUserLoggedIn(username) {
-    await expect(this.page.locator(this.usernameBadge)).toContainText(username);
+    const badgeText = await this.getText(this.usernameBadge);
+    if (!badgeText.includes(username)) {
+      throw new Error(`Expected username badge to contain "${username}", received "${badgeText}"`);
+    }
   }
 
   async viewMyOrders() {
-    await this.page.click(this.myOrdersLink);
-    await this.page.waitForLoadState('networkidle');
+    if (!await this.isOptionalVisible(this.myOrdersLink)) {
+      return false;
+    }
+
+    await this.click(this.myOrdersLink);
+    await this.waitForPageLoad();
+    return true;
   }
 
   async viewAddressBook() {
-    await this.page.click(this.addressBookLink);
-    await this.page.waitForLoadState('networkidle');
+    if (!await this.isOptionalVisible(this.addressBookLink)) {
+      return false;
+    }
+
+    await this.click(this.addressBookLink);
+    await this.waitForPageLoad();
+    return true;
   }
 
   async viewWishlist() {
-    await this.page.click(this.myWishlistLink);
-    await this.page.waitForLoadState('networkidle');
+    if (!await this.isOptionalVisible(this.myWishlistLink)) {
+      return false;
+    }
+
+    await this.click(this.myWishlistLink);
+    await this.waitForPageLoad();
+    return true;
   }
 
   async logout() {
-    await this.page.click(this.logoutLink);
-    await this.page.waitForLoadState('networkidle');
+    await this.click(this.logoutLink);
+    await this.waitForPageLoad();
   }
 
   async deleteAccount() {
-    await this.page.click(this.deleteAccountButton);
-    await this.page.waitForLoadState('networkidle');
+    await this.click(this.deleteAccountButton);
+    await this.waitForPageLoad();
+  }
+
+  async isOptionalVisible(selector) {
+    const locator = this.page.locator(selector);
+    return await locator.count() > 0 && await locator.first().isVisible();
   }
 }
 

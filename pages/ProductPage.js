@@ -73,16 +73,18 @@ class ProductPage extends BasePage {
    */
   async addFirstProductToCart() {
     await this.click(`${this.addToCartButton}:first-of-type`);
-    await this.waitForPageLoad();
+    await this.waitForVisible('.modal');
   }
 
   /**
    * Add specific product to cart by position
    */
   async addProductToCartByPosition(position) {
-    const buttons = await this.page.locator(this.addToCartButton);
-    await buttons.nth(position - 1).click();
-    await this.waitForPageLoad();
+    const button = this.page.locator(this.addToCartButton).nth(position - 1);
+    await button.waitFor({ state: 'visible', timeout: this.defaultTimeout });
+    await button.scrollIntoViewIfNeeded();
+    await button.click({ force: true, timeout: this.defaultTimeout });
+    await this.waitForVisible('.modal');
   }
 
   /**

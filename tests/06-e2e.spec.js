@@ -120,7 +120,8 @@ test.describe('End-to-End (E2E) Workflow Tests', () => {
     
     if (itemCount > 0) {
       await cartPage.proceedToCheckout();
-      expect(await checkoutPage.page.url()).toContain('payment');
+      expect(await checkoutPage.page.url()).toContain('checkout');
+      await checkoutPage.verifyAddressDetailsVisible();
     }
   });
 

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Comprehensive Playwright end-to-end test automation for e-commerce platform",
   "main": "index.js",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "test": "playwright test",
     "test:headed": "playwright test --headed",

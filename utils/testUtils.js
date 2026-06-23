@@ -12,10 +12,6 @@ function isValidEmail(email) {
   return emailRegex.test(email);
 }
 
-async function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 function isValidCardNumber(cardNumber) {
   return cardNumber.length === 16 && /^\d+$/.test(cardNumber);
 }
@@ -45,7 +41,6 @@ module.exports = {
   generateRandomEmail,
   generateRandomString,
   isValidEmail,
-  sleep,
   isValidCardNumber,
   getCurrentDate,
   getFormattedDate,

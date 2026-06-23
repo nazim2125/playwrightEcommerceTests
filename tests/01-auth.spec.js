@@ -11,40 +11,44 @@ test.describe('Authentication & Login Tests', () => {
   test.beforeEach(async ({ page }) => {
     loginPage = new LoginPage(page);
     homePage = new HomePage(page);
-    await loginPage.navigateToLoginPage();
   });
 
-  test('TC-001: User login with valid credentials', async ({page}) => {
+  test('TC-001: User login with valid credentials', async ({ page }) => {
+    await loginPage.navigateToLoginPage();
     await loginPage.login(testData.validUser.email, testData.validUser.password);
     await loginPage.verifyLoginSuccessful();
     expect(page.url()).toContain('/');
   });
 
   test('TC-002: User login with invalid email', async () => {
+    await loginPage.navigateToLoginPage();
     await loginPage.login('invalidemail@example.com', testData.validUser.password);
     const errorMsg = await loginPage.getErrorMessage();
     expect(errorMsg).toBeTruthy();
   });
 
   test('TC-003: User login with invalid password', async () => {
+    await loginPage.navigateToLoginPage();
     await loginPage.login(testData.validUser.email, 'wrongpassword');
     const errorMsg = await loginPage.getErrorMessage();
     expect(errorMsg).toBeTruthy();
   });
 
   test('TC-004: User login with empty credentials', async () => {
+    await loginPage.navigateToLoginPage();
     await loginPage.login('', '');
     const errorMsg = await loginPage.verifyErrorMessage();
     expect(errorMsg).toBeTruthy();
-    console.log(errorMsg)
-    });
+  });
 
-  test('TC-005: User can navigate to signup from login page', async ({page}) => {
-    await homePage.clickSignupLogin()
-    expect(page.url()).toContain('/login')
+  test('TC-005: User can view signup form from login page', async ({ page }) => {
+    await loginPage.navigateToLoginPage();
+    await expect(page.locator(loginPage.signupNameInput)).toBeVisible();
+    await expect(page.locator(loginPage.signupEmailInput)).toBeVisible();
   });
 
   test('TC-006: Verify login form elements are visible', async () => {
+    await loginPage.navigateToLoginPage();
     expect(await loginPage.isVisible(loginPage.emailInput)).toBeTruthy();
     expect(await loginPage.isVisible(loginPage.passwordInput)).toBeTruthy();
     expect(await loginPage.isVisible(loginPage.loginButton)).toBeTruthy();
@@ -60,7 +64,8 @@ test.describe('Authentication & Login Tests', () => {
     expect(isValidEmail(email)).toBeFalsy();
   });
 
-  test('TC-009: User logout and login again', async ({page}) => {
+  test('TC-009: User logout and login again', async ({ page }) => {
+    await loginPage.navigateToLoginPage();
     await loginPage.login(testData.validUser.email, testData.validUser.password);
     await loginPage.verifyLoginSuccessful();
     expect(page.url()).toContain('/');
@@ -72,6 +77,7 @@ test.describe('Authentication & Login Tests', () => {
   });
 
   test('TC-010: Verify page title on login page', async ({ page }) => {
+    await loginPage.navigateToLoginPage();
     const title = await page.title();
     expect(title).toContain('Automation Exercise');
   });

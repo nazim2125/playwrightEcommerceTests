@@ -1,8 +1,8 @@
-const { expect } = require('@playwright/test');
+const BasePage = require('./BasePage');
 
-class CartPage {
+class CartPage extends BasePage {
   constructor(page) {
-    this.page = page;
+    super(page);
     this.cartTable = 'table.table-striped';
     this.cartItem = '#cart_info_table tbody tr';
     this.quantityInput = 'input[class*="cart_quantity"]';
@@ -15,47 +15,79 @@ class CartPage {
   }
 
   async navigateToCart() {
-    await this.page.goto('/view_cart');
+    await this.goto('/view_cart');
   }
 
   async verifyCartPageLoaded() {
-    await this.page.waitForLoadState('networkidle');
+    await this.waitForPageLoad();
+    await this.waitForVisible(this.cartItem);
   }
 
   async getCartItemCount() {
     return await this.page.locator(this.cartItem).count();
   }
 
+  async getNumberOfItemsInCart() {
+    return await this.getCartItemCount();
+  }
+
   async verifyCartNotEmpty() {
+    await this.waitForVisible(this.cartItem);
     const cartItems = await this.page.locator(this.cartItem).count();
-    expect(cartItems).toBeGreaterThan(0);
+    if (cartItems === 0) {
+      throw new Error('Expected cart to contain at least one item');
+    }
   }
 
   async verifyCartEmpty() {
-    await expect(this.page.locator(this.cartEmpty)).toBeVisible();
+    await this.waitForVisible(this.cartEmpty);
   }
 
   async removeProductFromCart(itemIndex = 0) {
     const removeButtons = this.page.locator(this.removeButton);
+    const initialCount = await this.getCartItemCount();
+
     if (itemIndex < await removeButtons.count()) {
-      await removeButtons.nth(itemIndex).click();
-      await this.page.waitForLoadState('networkidle');
+      const button = removeButtons.nth(itemIndex);
+      await button.waitFor({ state: 'visible', timeout: this.defaultTimeout });
+      await button.scrollIntoViewIfNeeded();
+      await button.click({ force: true, timeout: this.defaultTimeout });
+      await this.page.waitForFunction(
+        ({ selector, count }) => document.querySelectorAll(selector).length < count,
+        { selector: this.cartItem, count: initialCount },
+        { timeout: this.defaultTimeout }
+      );
     }
+  }
+
+  async removeFirstItem() {
+    await this.removeProductFromCart(0);
   }
 
   async updateQuantity(itemIndex = 0, quantity = 2) {
     const quantityInputs = this.page.locator(this.quantityInput);
     if (itemIndex < await quantityInputs.count()) {
+      await quantityInputs.nth(itemIndex).waitFor({ state: 'visible', timeout: this.defaultTimeout });
       await quantityInputs.nth(itemIndex).fill(quantity.toString());
+      return true;
     }
+
+    return false;
+  }
+
+  async getItemQuantity(itemIndex = 0) {
+    const quantity = this.page.locator(this.productQuantity).nth(itemIndex);
+    await quantity.waitFor({ state: 'visible', timeout: this.defaultTimeout });
+    return Number.parseInt(await quantity.textContent(), 10);
   }
 
   async proceedToCheckout() {
-    await this.page.click(this.proceedCheckoutButton);
-    await this.page.waitForLoadState('networkidle');
+    await this.click(this.proceedCheckoutButton);
+    await this.waitForPageLoad();
   }
 
   async getTotalPrice() {
+    await this.waitForVisible(this.productPrice);
     const prices = await this.page.locator(this.productPrice).allTextContents();
     return prices;
   }

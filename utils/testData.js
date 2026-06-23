@@ -43,13 +43,13 @@ const testData = {
     creditCard: {
       cardNumber: '4242424242424242',
       cardName: 'John Doe',
-      cardExpiry: '12/25',
+      cardExpiry: '12/27',
       cardCvc: '123',
     },
     alternateCard: {
       cardNumber: '5555555555554444',
       cardName: 'Jane Smith',
-      cardExpiry: '06/26',
+      cardExpiry: '06/27',
       cardCvc: '456',
     },
   },

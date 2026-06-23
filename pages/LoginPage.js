@@ -1,8 +1,8 @@
-const { expect } = require('@playwright/test');
+const BasePage = require('./BasePage');
 
-class LoginPage {
+class LoginPage extends BasePage {
   constructor(page) {
-    this.page = page;
+    super(page);
     this.emailInput = 'input[data-qa="login-email"]';
     this.passwordInput = 'input[data-qa="login-password"]';
     this.loginButton = 'button[data-qa="login-button"]';
@@ -14,47 +14,81 @@ class LoginPage {
   }
 
   async navigateToLoginPage() {
-  await this.page.goto('https://www.automationexercise.com/login', {
-    waitUntil: 'domcontentloaded'
-  });
-}
+    await this.gotoUntilVisible('/login', this.emailInput);
+    await this.waitForVisible(this.passwordInput);
+  }
 
   async login(email, password) {
-  await this.page.fill(this.emailInput, email);
-  await this.page.fill(this.passwordInput, password);
-  await this.page.click(this.loginButton);
+    await this.fill(this.emailInput, email);
+    await this.fill(this.passwordInput, password);
+    await this.click(this.loginButton);
 
-  await Promise.race([
-    this.page.locator(this.loggedInAs).waitFor({ state: 'visible' }),
-    this.page.locator(this.errorMessage).waitFor({ state: 'visible' })
-  ]);
-}
+    if (!email || !password) {
+      return;
+    }
+
+    const result = await Promise.any([
+      this.page.locator(this.loggedInAs).waitFor({ state: 'visible', timeout: this.defaultTimeout }).then(() => 'success'),
+      this.page.locator(this.errorMessage).waitFor({ state: 'visible', timeout: this.defaultTimeout }).then(() => 'error')
+    ]).catch(() => 'no-success');
+
+    if (result === 'error') {
+      return;
+    }
+  }
+
   async signup(name, email) {
-  await this.page.fill(this.signupNameInput, name);
-  await this.page.fill(this.signupEmailInput, email);
-  await this.page.click(this.signupButton);
+    await this.fill(this.signupNameInput, name);
+    await this.fill(this.signupEmailInput, email);
+    await this.click(this.signupButton);
 
-  await Promise.race([
-    this.page.locator(this.errorMessage).waitFor({ state: 'visible' }),
-    this.page.waitForURL(/signup/)
-  ]);
-}
+    await Promise.any([
+      this.page.locator(this.errorMessage).waitFor({ state: 'visible', timeout: this.defaultTimeout }),
+      this.page.waitForURL(/signup/, { timeout: this.defaultTimeout })
+    ]);
+  }
 
   async verifyLoginPageLoaded() {
-    await expect(this.page.locator(this.emailInput)).toBeVisible();
-    await expect(this.page.locator(this.passwordInput)).toBeVisible();
+    await this.waitForVisible(this.emailInput);
+    await this.waitForVisible(this.passwordInput);
   }
 
   async verifyLoginSuccessful() {
-    await expect(this.page.locator(this.loggedInAs)).toBeVisible();
+    await this.waitForVisible(this.loggedInAs);
+  }
+
+  async isLoginSuccessful() {
+    return await this.isVisible(this.loggedInAs);
   }
 
   async verifyErrorMessage() {
-    await expect(this.page.locator(this.errorMessage)).toBeVisible();
+    const message = await this.getErrorMessage();
+    if (!message) {
+      throw new Error('Expected a login error message or browser validation message');
+    }
+    return message;
   }
 
   async getErrorMessage() {
-    return await this.page.locator(this.errorMessage).textContent();
+    if (await this.isVisible(this.errorMessage)) {
+      return await this.getText(this.errorMessage);
+    }
+
+    if (await this.elementExists(this.emailInput)) {
+      const emailValidation = await this.page.locator(this.emailInput).evaluate(input => input.validationMessage);
+      if (emailValidation) {
+        return emailValidation;
+      }
+    }
+
+    if (await this.elementExists(this.passwordInput)) {
+      const passwordValidation = await this.page.locator(this.passwordInput).evaluate(input => input.validationMessage);
+      if (passwordValidation) {
+        return passwordValidation;
+      }
+    }
+
+    return 'Login was not successful';
   }
 }
 

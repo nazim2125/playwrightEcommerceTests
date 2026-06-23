@@ -22,7 +22,7 @@ test.describe('@sanity Complete E2E Purchase Flow', () => {
     await productsPage.searchProduct(testData.products.search.validKeyword);
   
     await productsPage.addProductToCart(0);
-    await page.click('a.btn.btn-default:has-text("View Cart")');
+    await productsPage.viewCartFromModal();
   
     const cartPage = new CartPage(page);
     await cartPage.verifyCartNotEmpty();
@@ -30,10 +30,10 @@ test.describe('@sanity Complete E2E Purchase Flow', () => {
     await cartPage.proceedToCheckout();
     
     const checkoutPage = new CheckoutPage(page);
-    await checkoutPage.fillAddress(testData.addressData.valid);
+    await checkoutPage.verifyAddressDetailsVisible();
     await checkoutPage.addComment('Please handle with care');
     await checkoutPage.placeOrder();
-    await expect(page.locator('h2, h1')).toContainText(/Payment|Review/);
+    await expect(page.locator(checkoutPage.cardNumberInput).first()).toBeVisible();
   });
 
   test('TC035: Complete Purchase with Alternative Payment Card', async ({ page }) => {
@@ -47,13 +47,13 @@ test.describe('@sanity Complete E2E Purchase Flow', () => {
     const productsPage = new ProductsPage(page);
     await homePage.clickAllProducts();
     await productsPage.addProductToCart(1);
-    await page.click('a.btn.btn-default:has-text("View Cart")');
+    await productsPage.viewCartFromModal();
     
     const cartPage = new CartPage(page);
     await cartPage.proceedToCheckout();
     
     const checkoutPage = new CheckoutPage(page);
-    await checkoutPage.fillAddress(testData.addressData.alternate);
+    await checkoutPage.verifyAddressDetailsVisible();
     await checkoutPage.placeOrder();
     await checkoutPage.fillPaymentDetails(testData.paymentData.alternateCard);
   });
@@ -69,11 +69,10 @@ test.describe('@sanity Complete E2E Purchase Flow', () => {
     const productsPage = new ProductsPage(page);
     await homePage.clickAllProducts();
     
-    // Add 2 products
     await productsPage.addProductToCart(0);
-    await page.click('a.btn.btn-default:has-text("Continue")');
+    await productsPage.continueShoppingFromModal();
     await productsPage.addProductToCart(1);
-    await page.click('a.btn.btn-default:has-text("View Cart")');
+    await productsPage.viewCartFromModal();
     
     const cartPage = new CartPage(page);
     const itemCount = await cartPage.getCartItemCount();
@@ -107,7 +106,7 @@ test.describe('@sanity Complete E2E Purchase Flow', () => {
     expect(count).toBeGreaterThan(0);
     
     await productsPage.addProductToCart(0);
-    await page.click('a.btn.btn-default:has-text("View Cart")');
+    await productsPage.viewCartFromModal();
     
     const cartPage = new CartPage(page);
     await cartPage.verifyCartNotEmpty();

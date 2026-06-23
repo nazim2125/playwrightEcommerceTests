@@ -11,14 +11,13 @@ const generateRandomZipcode = () => {
 };
 
 const waitForElement = async (page, selector, timeout = 5000) => {
-  await page.waitForSelector(selector, { timeout });
+  await page.locator(selector).first().waitFor({ state: 'visible', timeout });
 };
 
 const clearAndFill = async (page, selector, value) => {
-  await page.click(selector);
-  await page.keyboard.press('Control+A');
-  await page.keyboard.press('Delete');
-  await page.type(selector, value);
+  const locator = page.locator(selector).first();
+  await locator.waitFor({ state: 'visible', timeout: 10000 });
+  await locator.fill(value);
 };
 
 const takeScreenshot = async (page, name) => {
@@ -31,8 +30,8 @@ const verifyPageTitle = async (page, expectedTitle) => {
 };
 
 const navigateAndWait = async (page, url) => {
-  await page.goto(url);
-  await page.waitForLoadState('networkidle');
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
+  await page.waitForLoadState('domcontentloaded');
 };
 
 module.exports = {

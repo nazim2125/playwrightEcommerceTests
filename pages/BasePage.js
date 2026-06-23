@@ -5,64 +5,95 @@
 class BasePage {
   constructor(page) {
     this.page = page;
+    this.defaultTimeout = 15000;
+    this.navigationTimeout = 30000;
   }
 
   /**
    * Navigate to a specific URL
    */
   async goto(url = '/') {
-  await this.page.goto(url, {
-    waitUntil: 'domcontentloaded',
-    timeout: 30000
-  });
-}
+    await this.page.goto(url, {
+      waitUntil: 'domcontentloaded',
+      timeout: this.navigationTimeout
+    });
+  }
+
+  async gotoUntilVisible(url, selector, attempts = 3) {
+    let lastError;
+
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      try {
+        await this.goto(url);
+        await this.waitForVisible(selector, this.navigationTimeout);
+        return;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError;
+  }
   /**
    * Wait for page to load completely
    */
   async waitForPageLoad() {
-  await this.page.waitForLoadState('domcontentloaded');
-}
+    await this.page.waitForLoadState('domcontentloaded', { timeout: this.defaultTimeout });
+  }
 
   /**
    * Click on an element
    */
   async click(selector) {
-    await this.page.locator(selector).click();
+    const locator = this.page.locator(selector).first();
+    await locator.waitFor({ state: 'visible', timeout: this.defaultTimeout });
+    await locator.scrollIntoViewIfNeeded();
+    await locator.click({ timeout: this.defaultTimeout });
   }
 
   /**
    * Fill text input
    */
   async fill(selector, text) {
-    await this.page.locator(selector).fill(text);
+    const locator = this.page.locator(selector).first();
+    await locator.waitFor({ state: 'visible', timeout: this.defaultTimeout });
+    await locator.scrollIntoViewIfNeeded();
+    await locator.fill(text, { timeout: this.defaultTimeout });
   }
 
   /**
    * Get text from element
    */
   async getText(selector) {
-    return await this.page.locator(selector).textContent();
+    const locator = this.page.locator(selector).first();
+    await locator.waitFor({ state: 'visible', timeout: this.defaultTimeout });
+    return await locator.textContent();
   }
 
   /**
    * Check if element is visible
    */
   async isVisible(selector) {
-    return await this.page.locator(selector).isVisible();
+    const locator = this.page.locator(selector);
+    if (await locator.count() === 0) {
+      return false;
+    }
+
+    return await locator.first().isVisible();
   }
 
   /**
    * Wait for element to be visible
    */
   async waitForVisible(selector, timeout = 30000) {
-    await this.page.locator(selector).waitFor({ state: 'visible', timeout });
+    await this.page.locator(selector).first().waitFor({ state: 'visible', timeout });
   }
 
   /**
    * Wait for element to be hidden
    */
   async waitForHidden(selector, timeout = 30000) {
-    await this.page.locator(selector).waitFor({ state: 'hidden', timeout });
+    await this.page.locator(selector).first().waitFor({ state: 'hidden', timeout });
   }
 
   /**
@@ -83,14 +114,14 @@ class BasePage {
    * Reload page
    */
   async reloadPage() {
-    await this.page.reload();
+    await this.page.reload({ waitUntil: 'domcontentloaded', timeout: this.defaultTimeout });
   }
 
   /**
    * Go back
    */
   async goBack() {
-    await this.page.goBack();
+    await this.page.goBack({ waitUntil: 'domcontentloaded', timeout: this.defaultTimeout });
   }
 
   /**
@@ -105,13 +136,16 @@ class BasePage {
    * Hover over element
    */
   async hover(selector) {
-    await this.page.locator(selector).hover();
+    const locator = this.page.locator(selector).first();
+    await locator.waitFor({ state: 'visible', timeout: this.defaultTimeout });
+    await locator.hover();
   }
 
   /**
    * Get all text from multiple elements
    */
   async getAllTexts(selector) {
+    await this.waitForVisible(selector);
     return await this.page.locator(selector).allTextContents();
   }
 
@@ -119,7 +153,9 @@ class BasePage {
    * Select option from dropdown by value
    */
   async selectDropdown(selector, value) {
-    await this.page.locator(selector).selectOption(value);
+    const locator = this.page.locator(selector).first();
+    await locator.waitFor({ state: 'visible', timeout: this.defaultTimeout });
+    await locator.selectOption(value);
   }
 
   /**
@@ -133,7 +169,7 @@ class BasePage {
    * Wait for URL to contain text
    */
   async waitForUrlContains(text) {
-    await this.page.waitForURL(`**/*${text}*`);
+    await this.page.waitForURL(`**/*${text}*`, { timeout: this.defaultTimeout });
   }
 }
 
