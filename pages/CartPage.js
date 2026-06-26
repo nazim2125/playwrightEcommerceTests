@@ -44,21 +44,19 @@ class CartPage extends BasePage {
   }
 
   async removeProductFromCart(itemIndex = 0) {
-    const removeButtons = this.page.locator(this.removeButton);
-    const initialCount = await this.getCartItemCount();
-
-    if (itemIndex < await removeButtons.count()) {
-      const button = removeButtons.nth(itemIndex);
-      await button.waitFor({ state: 'visible', timeout: this.defaultTimeout });
-      await button.scrollIntoViewIfNeeded();
-      await button.click({ force: true, timeout: this.defaultTimeout });
-      await this.page.waitForFunction(
-        ({ selector, count }) => document.querySelectorAll(selector).length < count,
-        { selector: this.cartItem, count: initialCount },
-        { timeout: this.defaultTimeout }
-      );
-    }
+  const removeButtons = this.page.locator(this.removeButton);
+  const initialCount = await this.getCartItemCount();
+  if (itemIndex < await removeButtons.count()) {
+    const button = removeButtons.nth(itemIndex);
+    await button.scrollIntoViewIfNeeded();
+    await button.click({ timeout: this.defaultTimeout }); // force removed
+    await this.page.waitForFunction(
+      ({ selector, count }) => document.querySelectorAll(selector).length < count,
+      { selector: this.cartItem, count: initialCount },
+      { timeout: this.defaultTimeout }
+    );
   }
+}
 
   async removeFirstItem() {
     await this.removeProductFromCart(0);

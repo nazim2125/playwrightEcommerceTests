@@ -41,20 +41,21 @@ class ProductsPage extends BasePage {
   }
 
   async addProductToCart(productIndex = 0) {
-    const addButtons = this.page.locator(this.addToCartButton);
-    const count = await addButtons.count();
-    if (count <= productIndex) {
-      throw new Error(`Expected product at index ${productIndex}, but found ${count} add-to-cart buttons`);
-    }
-
-    if (productIndex < count) {
-      const button = addButtons.nth(productIndex);
-      await button.waitFor({ state: 'visible', timeout: this.defaultTimeout });
-      await button.scrollIntoViewIfNeeded();
-      await button.click({ force: true, timeout: this.defaultTimeout });
-      await this.waitForVisible('.modal');
-    }
+  const cards = this.page.locator(this.productList);
+  const count = await cards.count();
+  if (count <= productIndex) {
+    throw new Error(`Expected product at index ${productIndex}, but found ${count} products`);
   }
+
+  const card = cards.nth(productIndex);
+  await card.scrollIntoViewIfNeeded();
+  await card.hover();
+
+  const button = card.locator('a.btn-default[data-product-id]').first();
+  await button.waitFor({ state: 'visible', timeout: this.defaultTimeout });
+  await button.click({ timeout: this.defaultTimeout }); // force removed
+  await this.waitForVisible('.modal.in, .modal.show', this.defaultTimeout);
+}
 
   async verifySearchResults(keyword) {
     const results = await this.page.locator(this.productList).count();
@@ -71,9 +72,11 @@ class ProductsPage extends BasePage {
   }
 
   async viewCartFromModal() {
-    await this.click(this.viewCartButton);
-    await this.waitForPageLoad();
-  }
+  const link = this.page.locator(this.viewCartButton).first();
+  await link.waitFor({ state: 'visible', timeout: this.defaultTimeout });
+  await link.dispatchEvent('click');
+  await this.waitForPageLoad();
+}
 
   async continueShoppingFromModal() {
     await this.click(this.continueShoppingButton);

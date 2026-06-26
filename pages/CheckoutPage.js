@@ -64,9 +64,10 @@ class CheckoutPage extends BasePage {
   }
 
   async placeOrder() {
-    await this.click(this.placeOrderButton);
-    await this.waitForVisible(this.cardNumberInput);
-  }
+  await this.click(this.placeOrderButton);
+  await this.waitForUrlContains('payment');
+  await this.waitForVisible(this.cardNumberInput);
+}
 
   async payNow() {
     await this.click(this.payButton);

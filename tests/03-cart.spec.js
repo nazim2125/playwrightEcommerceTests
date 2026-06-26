@@ -31,6 +31,7 @@ test.describe('@smoke @regression Shopping Cart Tests', () => {
   test('TC015: Verify Products Added to Cart are Visible', async ({ page }) => {
     await productsPage.addProductToCart(0);
     await productsPage.viewCartFromModal();
+    await cartPage.verifyCartPageLoaded();
     const itemCount = await cartPage.getCartItemCount();
     expect(itemCount).toBeGreaterThan(0);
   });
@@ -38,6 +39,7 @@ test.describe('@smoke @regression Shopping Cart Tests', () => {
   test('TC016: User Can Update Product Quantity in Cart', async ({ page }) => {
     await productsPage.addProductToCart(0);
     await productsPage.viewCartFromModal();
+    await cartPage.verifyCartPageLoaded();
     const wasEditable = await cartPage.updateQuantity(0, 3);
 
     if (wasEditable) {
@@ -53,6 +55,7 @@ test.describe('@smoke @regression Shopping Cart Tests', () => {
   test('TC017: User Can Remove Product from Cart', async ({ page }) => {
     await productsPage.addProductToCart(0);
     await productsPage.viewCartFromModal();
+    await cartPage.verifyCartPageLoaded();
     const initialCount = await cartPage.getCartItemCount();
     await cartPage.removeProductFromCart(0);
     const updatedCount = await cartPage.getCartItemCount();
@@ -62,6 +65,7 @@ test.describe('@smoke @regression Shopping Cart Tests', () => {
   test('TC018: Cart Displays Correct Product Details', async ({ page }) => {
     await productsPage.addProductToCart(0);
     await productsPage.viewCartFromModal();
+    await cartPage.verifyCartPageLoaded();
     const prices = await cartPage.getTotalPrice();
     expect(prices.length).toBeGreaterThan(0);
   });

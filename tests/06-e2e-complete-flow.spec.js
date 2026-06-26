@@ -6,6 +6,13 @@ const CartPage = require('../pages/CartPage');
 const CheckoutPage = require('../pages/CheckoutPage');
 const testData = require('../utils/testData');
 
+test.beforeEach(async ({ page }) => {
+  await page.route('**://*.googlesyndication.com/**', route => route.abort());
+  await page.route('**://*.doubleclick.net/**', route => route.abort());
+  await page.route('**://*.googleadservices.com/**', route => route.abort());
+  await page.route('**://*.google-analytics.com/**', route => route.abort());
+});
+
 test.describe('@sanity Complete E2E Purchase Flow', () => {
   test('TC034: Complete End-to-End Purchase Flow - Existing User', async ({ page }) => {
     const homePage = new HomePage(page);
@@ -75,11 +82,12 @@ test.describe('@sanity Complete E2E Purchase Flow', () => {
     await productsPage.viewCartFromModal();
     
     const cartPage = new CartPage(page);
+    await cartPage.verifyCartPageLoaded();
     const itemCount = await cartPage.getCartItemCount();
     expect(itemCount).toBeGreaterThanOrEqual(2);
     
     await cartPage.proceedToCheckout();
-    await expect(page.locator('h2, h1')).toContainText('Address');
+    await expect(page.getByRole('heading', { name: 'Address Details' })).toBeVisible();
   });
 
   test('TC037: Search for Product and Verify Not Found', async ({ page }) => {

@@ -178,6 +178,29 @@ The project includes a `.github/workflows/` directory with:
 - HTML report generation
 - Test result artifacts
 
+## Docker Support
+
+Run the Playwright test suite in a consistent containerized environment without installing browser dependencies locally.
+
+### Build the Docker Image
+
+```bash
+docker compose build
+```
+
+### Run Tests
+
+```bash
+docker compose up
+```
+
+### Docker Features
+
+* Official Playwright Docker image
+* Cross-platform support (Windows, macOS, Linux)
+* Consistent test execution
+* Pre-installed browser dependencies
+* CI/CD ready
 
 ### Tests Failing?
 1. Ensure the application is accessible at `https://www.automationexercise.com`
