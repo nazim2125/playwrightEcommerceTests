@@ -4,7 +4,7 @@ const LoginPage = require('../pages/LoginPage');
 const ProductPage = require('../pages/ProductPage');
 const CartPage = require('../pages/CartPage');
 const CheckoutPage = require('../pages/CheckoutPage');
-const testData = require('../fixtures/testData');
+const testData = require('../utils/testData');
 
 test.describe('End-to-End (E2E) Workflow Tests', () => {
   let homePage;
@@ -32,7 +32,7 @@ test.describe('End-to-End (E2E) Workflow Tests', () => {
     await productPage.navigateToProducts();
     expect(await productPage.areProductsVisible()).toBeTruthy();
 
-    await productPage.searchProduct(testData.searchTerms.validProduct);
+    await productPage.searchProduct(testData.products.search.validKeyword);
     await productPage.addFirstProductToCart();
 
     await cartPage.navigateToCart();
@@ -42,7 +42,7 @@ test.describe('End-to-End (E2E) Workflow Tests', () => {
   test('TC-053: E2E - Login flow complete', async () => {
     await loginPage.navigateToLoginPage();
 
-    await loginPage.login(testData.validUser.email, testData.validUser.password);
+    await loginPage.login(testData.users.validUser.email, testData.users.validUser.password);
     expect(await loginPage.isLoginSuccessful()).toBeTruthy();
 
     await homePage.navigateToHome();
@@ -52,7 +52,7 @@ test.describe('End-to-End (E2E) Workflow Tests', () => {
   test('TC-054: E2E - Search and add product', async () => {
     await productPage.navigateToProducts();
 
-    await productPage.searchProduct(testData.searchTerms.validProduct);
+    await productPage.searchProduct(testData.products.search.validKeyword);
     const productCount = await productPage.getProductCount();
     expect(productCount).toBeGreaterThan(0);
     await productPage.addFirstProductToCart();
@@ -63,7 +63,7 @@ test.describe('End-to-End (E2E) Workflow Tests', () => {
 
   test('TC-055: E2E - Login and browse products', async () => {
     await loginPage.navigateToLoginPage();
-    await loginPage.login(testData.validUser.email, testData.validUser.password);
+    await loginPage.login(testData.users.validUser.email, testData.users.validUser.password);
     expect(await loginPage.isLoginSuccessful()).toBeTruthy();
 
     await productPage.navigateToProducts();
@@ -73,14 +73,14 @@ test.describe('End-to-End (E2E) Workflow Tests', () => {
   test('TC-056: E2E - Search multiple products', async () => {
     await productPage.navigateToProducts();
 
-    await productPage.searchProduct(testData.searchTerms.validProduct);
+    await productPage.searchProduct(testData.products.search.validKeyword);
     expect(await productPage.areProductsVisible()).toBeTruthy();
   });
 
   test('TC-057: E2E - Add multiple products to cart', async () => {
     await productPage.navigateToProducts();
   
-    await productPage.searchProduct(testData.searchTerms.validProduct);
+    await productPage.searchProduct(testData.products.search.validKeyword);
     await productPage.addFirstProductToCart();
 
     await productPage.navigateToProducts();
@@ -93,7 +93,7 @@ test.describe('End-to-End (E2E) Workflow Tests', () => {
 
   test('TC-058: E2E - Remove product from cart', async () => {
     await productPage.navigateToProducts();
-    await productPage.searchProduct(testData.searchTerms.validProduct);
+    await productPage.searchProduct(testData.products.search.validKeyword);
     await productPage.addFirstProductToCart();
 
     await cartPage.navigateToCart();
@@ -109,10 +109,10 @@ test.describe('End-to-End (E2E) Workflow Tests', () => {
   test('TC-059: E2E - Checkout process', async () => {
   
     await loginPage.navigateToLoginPage();
-    await loginPage.login(testData.validUser.email, testData.validUser.password);
+    await loginPage.login(testData.users.validUser.email, testData.users.validUser.password);
 
     await productPage.navigateToProducts();
-    await productPage.searchProduct(testData.searchTerms.validProduct);
+    await productPage.searchProduct(testData.products.search.validKeyword);
     await productPage.addFirstProductToCart();
 
     await cartPage.navigateToCart();

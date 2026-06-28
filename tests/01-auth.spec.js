@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const LoginPage = require('../pages/LoginPage');
 const HomePage = require('../pages/HomePage');
-const testData = require('../fixtures/testData');
+const testData = require('../utils/testData');
 const { generateRandomEmail, isValidEmail } = require('../utils/testUtils');
 
 test.describe('Authentication & Login Tests', () => {
@@ -15,21 +15,21 @@ test.describe('Authentication & Login Tests', () => {
 
   test('TC-001: User login with valid credentials', async ({ page }) => {
     await loginPage.navigateToLoginPage();
-    await loginPage.login(testData.validUser.email, testData.validUser.password);
+    await loginPage.login(testData.users.validUser.email, testData.users.validUser.password);
     await loginPage.verifyLoginSuccessful();
     expect(page.url()).toContain('/');
   });
 
   test('TC-002: User login with invalid email', async () => {
     await loginPage.navigateToLoginPage();
-    await loginPage.login('invalidemail@example.com', testData.validUser.password);
+    await loginPage.login(testData.users.invalidUser.email, testData.users.validUser.password);
     const errorMsg = await loginPage.getErrorMessage();
     expect(errorMsg).toBeTruthy();
   });
 
   test('TC-003: User login with invalid password', async () => {
     await loginPage.navigateToLoginPage();
-    await loginPage.login(testData.validUser.email, 'wrongpassword');
+    await loginPage.login(testData.users.validUser.email, testData.users.invalidUser.password);
     const errorMsg = await loginPage.getErrorMessage();
     expect(errorMsg).toBeTruthy();
   });
@@ -66,7 +66,7 @@ test.describe('Authentication & Login Tests', () => {
 
   test('TC-009: User logout and login again', async ({ page }) => {
     await loginPage.navigateToLoginPage();
-    await loginPage.login(testData.validUser.email, testData.validUser.password);
+    await loginPage.login(testData.users.validUser.email, testData.users.validUser.password);
     await loginPage.verifyLoginSuccessful();
     expect(page.url()).toContain('/');
     

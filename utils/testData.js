@@ -60,6 +60,7 @@ const testData = {
     },
     categories: ['dress', 'men', 'women'],
   },
+  newsletterEmail: `newsletter.${Date.now()}@example.com`,
 };
 
 module.exports = testData;
