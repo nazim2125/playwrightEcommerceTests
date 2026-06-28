@@ -88,7 +88,7 @@ playwright-ecommerce-tests/
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/nazim2125/playwright-ecommerce-tests.git
+git clone https://github.com/nazim2125/playwrightEcommerceTests.git
 cd playwright-ecommerce-tests
 ```
 
