@@ -30,29 +30,49 @@ Comprehensive end-to-end test automation suite for an e-commerce platform built 
 
 ```
 playwright-ecommerce-tests/
-├── pages/                          # Page Object Models
-│   ├── HomePage.js                
-│   ├── LoginPage.js               
-│   ├── ProductsPage.js            
-│   ├── CartPage.js                
-│   ├── CheckoutPage.js           
-│   └── AccountPage.js            
-├── tests/                         # Test specifications
-│   ├── 01-login.spec.js          
-│   ├── 02-products.spec.js       
-│   ├── 03-cart.spec.js           
-│   ├── 04-checkout.spec.js       
-│   ├── 05-account.spec.js        
-│   ├── 06-e2e-complete-flow.spec.js  
-│   └── 07-cross-browser.spec.js  
+│
+├── .github/
+│   └── workflows/
+│       └── playwright-tests.yml          # GitHub Actions CI workflow
+│
+├── fixtures/
+│   ├── base.js
+│   └── testData.js
+│
+├── pages/                               # Page Object Models
+│   ├── BasePage.js
+│   ├── HomePage.js
+│   ├── LoginPage.js
+│   ├── ProductsPage.js
+│   ├── ProductPage.js
+│   ├── CartPage.js
+│   ├── CheckoutPage.js
+│   └── AccountPage.js
+│
+├── tests/                               # Test Specifications
+│   ├── 01-auth.spec.js
+│   ├── 01-login.spec.js
+│   ├── 02-products.spec.js
+│   ├── 03-cart.spec.js
+│   ├── 04-checkout.spec.js
+│   ├── 05-account.spec.js
+│   ├── 06-e2e.spec.js
+│   ├── 06-e2e-complete-flow.spec.js
+│   └── 07-cross-browser.spec.js
+│
 ├── utils/
-│   ├── testData.js               
-│   └── helpers.js
-|   └── testUtils.js                 
-├── playwright.config.js          
-├── package.json                  
-├── .gitignore                    
-└── README.md                    
+│   ├── helpers.js
+│   ├── testData.js
+│   └── testUtils.js
+│
+├── playwright.config.js                 # Playwright configuration
+├── package.json                         # Project dependencies
+├── package-lock.json
+├── Dockerfile                           # Docker configuration
+├── docker-compose.yml                   # Docker Compose setup
+├── .gitignore
+├── .nvmrc
+├── README.md                  
 ```
 
 ---
